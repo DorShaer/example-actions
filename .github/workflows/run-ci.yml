@@ -1,4 +1,4 @@
-name: Combined Pipeline
+name: Bright Security Scan
 
 on:
   push:
@@ -13,12 +13,11 @@ on:
     - cron: "0 0 * * THU"
 
 jobs:
-  upload HAR:
+  upload_HAR:
     name: Upload HAR file
-    id: har-upload
-    if: always()
+    runs-on: ubuntu-latest
+    steps:
       - name: Upload HAR Files to BrightSecurity Dashboard
-        if: always()
         run: |
           mkdir hars
           cd hars
@@ -30,6 +29,7 @@ jobs:
                 "https://app.brightsec.com/api/v1/projects/${{ secrets.BRIGHTSECURITY_PROJECT_ID }}/files"
             fi
           done
+        id: har-upload
 
       - name: Scan Start
         id: start
@@ -40,7 +40,8 @@ jobs:
           name: Bright Scan - ${{ github.sha }}
           discovery_types: |
             [ "archive" ]
-          file_id: ${{ steps.har-upload.outputs }}  
+          file_id: ${{ steps.har-upload.outputs }}
+
       - name: Wait for Breakpoint
         id: wait
         uses: NeuraLegion/wait-for@release
