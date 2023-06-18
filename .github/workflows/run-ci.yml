@@ -1,3 +1,17 @@
+name: Bright Security Scan
+
+on:
+  push:
+    branches:
+      - crawler
+      - har-file
+      - swagger
+      - brokencrystals
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 0 * * THU"
+    
 jobs:
   upload_HAR:
     name: Upload HAR file
