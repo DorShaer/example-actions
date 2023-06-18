@@ -43,7 +43,8 @@ jobs:
           name: Bright Scan - ${{ github.sha }}
           discovery_types: |
             [ "archive" ]
-          id: ${{ steps.har-upload.outputs.fileId }}
+          fileId: ${{ steps.har-upload.outputs.fileId }}
+          hostsFilter: brokencrystals.com
 
       - name: Wait for Breakpoint
         id: wait
