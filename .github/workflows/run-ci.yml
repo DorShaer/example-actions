@@ -30,7 +30,6 @@ jobs:
                 "https://app.brightsec.com/api/v1/projects/${{ secrets.BRIGHTSECURITY_PROJECT_ID }}/files")
               file_id=$(echo "$response" | jq -r '.id')
               echo "::set-output name=fileId::$file_id"
-              echo $file_id
             fi
           done
 
@@ -43,8 +42,8 @@ jobs:
           name: Bright Scan - ${{ github.sha }}
           discovery_types: |
             [ "archive" ]
-          fileId: ${{ steps.har-upload.outputs.fileId }}
-          hostsFilter: brokencrystals.com
+          file_id: ${{ steps.har-upload.outputs.fileId }}
+          hosts_filter: brokencrstals.com
 
       - name: Wait for Breakpoint
         id: wait
