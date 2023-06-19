@@ -45,7 +45,7 @@
             name: Bright Scan - ${{ github.sha }}
             discovery_types: |
               [ "archive" ]
-            file_id: ${{ steps.upload.outputs.file_id }}
+            file_id: ${file_id}
             hosts_filter: brokencrystals.com
 
         - name: Wait for Breakpoint
