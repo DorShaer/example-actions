@@ -50,7 +50,7 @@
             discovery_types: |
               [ "archive" ]
             file_id: ${{ steps.har-upload.outputs.fileId }}
-            hosts-filter: brokencrystals.com
+            hosts_filter: brokencrystals.com
 
         - name: Wait for Breakpoint
           id: wait
