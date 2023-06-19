@@ -41,7 +41,7 @@ jobs:
         run: |
           scan_response=$(curl -v -X POST 'https://app.brightsec.com/api/v1/scans' \
           -H 'accept: application/json, text/plain, */*' \
-          -H 'authorization: ${{ secrets.BRIGHT_TOKEN }}' \
+          -H 'authorization: api-key ${{ secrets.BRIGHT_TOKEN }}' \
           -H 'content-type: application/json' \
           --data-raw '{"name":"yellocard-automation-test","poolSize":10,"smart":true,"optimizedCrawler":true,"maxInteractionsChainLength":3,
           "skipStaticParams":true,"slowEpTimeout":null,"targetTimeout":null,"exclusions":{},
