@@ -39,7 +39,7 @@ jobs:
         
       - name: Scan Start
         run: |
-          scan_response=$(curl -X POST 'https://app.brightsec.com/api/v1/scans' \
+          scan_response=$(curl -v -X POST 'https://app.brightsec.com/api/v1/scans' \
           -H 'accept: application/json, text/plain, */*' \
           -H 'authorization: ${{ secrets.BRIGHT_TOKEN }}' \
           -H 'content-type: application/json' \
