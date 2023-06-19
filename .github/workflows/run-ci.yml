@@ -34,7 +34,7 @@
                 echo "Uploaded file id: ${file_id}"
               fi
             done
-          id: har-upload
+          id: upload
 
         - name: Scan Start
           id: start
@@ -45,7 +45,7 @@
             name: Bright Scan - ${{ github.sha }}
             discovery_types: |
               [ "archive" ]
-            file_id: ${{ steps.har-upload.outputs.file_id }}
+            file_id: ${{ steps.upload.outputs.file_id }}
             hosts_filter: brokencrystals.com
 
         - name: Wait for Breakpoint
