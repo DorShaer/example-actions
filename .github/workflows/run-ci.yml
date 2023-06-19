@@ -9,8 +9,6 @@
         - brokencrystals
     pull_request:
       branches: [main]
-    schedule:
-      - cron: "0 0 * * THU"
 
   jobs:
     upload_HAR:
@@ -35,6 +33,7 @@
                   -H 'Content-Type: multipart/form-data' \
                   -F "file=@${file}" \
                   -s)
+                echo $response  
                 file_id=$(echo ${response} | jq -r '.file_id')
                 echo "Uploaded file id: ${file_id}"
               fi
