@@ -32,10 +32,12 @@
                   -H 'Content-Type: multipart/form-data' \
                   -F "file=@${file}" \
                   -s)
+                echo "Server response: ${response}"
                 file_id=$(echo ${response} | jq -r '.file_id')
                 echo "Uploaded file id: ${file_id}"
               fi
             done
+            echo "fileId=${file_id}" >> $GITHUB_ENV
           id: har-upload
 
         - name: Scan Start
@@ -48,9 +50,9 @@
             discovery_types: |
               [ "archive" ]
             file_id: ${{ steps.har-upload.outputs.fileId }}
-            hosts_filter: brokencrystals.com
+            hosts-filter: brokencrystals.com
 
-        - name: Wait for Breakpoints
+        - name: Wait for Breakpoint
           id: wait
           uses: NeuraLegion/wait-for@release
           with:
