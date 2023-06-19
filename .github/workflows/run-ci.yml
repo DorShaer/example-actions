@@ -39,7 +39,7 @@
           
         - name: Scan Start
           run: |
-            response=$(curl -X POST 'https://app.brightsec.com/api/v1/scans' \
+            scan_response=$(curl -X POST 'https://app.brightsec.com/api/v1/scans' \
             -H 'accept: application/json, text/plain, */*' \
             -H 'authorization: ${{ secrets.BRIGHT_TOKEN }}' \
             -H 'content-type: application/json' \
@@ -49,6 +49,7 @@
             "hostsFilter":["brokencrystals.com"],"templateId":"t69wgyhwq1B66NkKbxoiqi","labels":[],
             "discoveryTypes":["archive"],"attackParamLocations":["path","query","fragment","body"],
             "info":{"source":"ui","client":{"name":"bright-ui","version":"v4.76.2"}}}') \
+            scan_id=$(echo ${scan_response} | grep -oP '(?<="id":")[^"]*')
             echo "::set-output name=scan_id::$scan_id"
           id: start-scan
           
