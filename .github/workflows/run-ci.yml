@@ -28,7 +28,7 @@
                   -H 'Content-Type: multipart/form-data' \
                   -F "file=@${file}" \
                   -s)  
-                echo $response
+                echo $response | grep -oP '(?<="id":")[^"]*'
               fi
             done
           id: har-upload
