@@ -50,7 +50,7 @@ jobs:
           "discoveryTypes":["archive"],"attackParamLocations":["path","query","fragment","body"],
           "info":{"source":"ui","client":{"name":"bright-ui","version":"v4.76.2"}}}') \
           scan_id=$(echo ${scan_response} | grep -oP '(?<="id":")[^"]*')
-          echo "Started scan: $(scan_id)"
+          echo "Started scan: $scan_id"
           echo "::set-output name=scan_id::$scan_id"
         id: start-scan
         
