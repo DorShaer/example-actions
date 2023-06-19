@@ -1,59 +1,66 @@
-name: Bright Security Scan
+  name: Bright Security Scan
 
-on:
-  push:
-    branches:
-      - crawler
-      - har-file
-      - swagger
-      - brokencrystals
-  pull_request:
-    branches: [main]
+  on:
+    push:
+      branches:
+        - crawler
+        - har-file
+        - swagger
+        - brokencrystals
+    pull_request:
+      branches: [main]
+    schedule:
+      - cron: "0 0 * * THU"
 
-jobs:
-  upload_HAR:
-    name: Upload HAR file
-    runs-on: ubuntu-latest
-    steps:
-      - name: Upload HAR Files to BrightSecurity Dashboard
-        if: always()
-        run: |
-          mkdir hars
-          cd hars
-          wget https://gist.githubusercontent.com/DorShaer/037475d0febe67396d374a56d053e13e/raw/227b68d164051c024713fa5af7fa7cec7808af7d/brokencrystals.har -q
-          for file in hars/*; do
-            if [ -f "$file" ]; then
-              curl -X 'POST' \
-                'https://app.brightsec.com/api/v1/projects/${{ secrets.BRIGHTSECURITY_PROJECT_ID }}/files' \
-                -H 'accept: application/json' \
-                -H 'Authorization: api-key ${{ secrets.BRIGHT_TOKEN }}' \
-                -H 'Content-Type: multipart/form-data' \
-                -F "file=@${file}"
-            fi
-          done
-        id: har-upload
+  jobs:
+    upload_HAR:
+      name: Upload HAR file
+      runs-on: ubuntu-latest
+      steps:
+        - name: Upload HAR Files to BrightSecurity Dashboard
+          if: always()
+          run: |
+            sudo apt-get install jq -y
+            mkdir hars
+            cd hars
+            wget https://gist.githubusercontent.com/DorShaer/037475d0febe67396d374a56d053e13e/raw/227b68d164051c024713fa5af7fa7cec7808af7d/brokencrystals.har -q
+            cd ..
+            for file in hars/*; do
+              if [ -f "$file" ]; then
+                response=$(curl -X 'POST' \
+                  'https://app.brightsec.com/api/v1/projects/${{ secrets.BRIGHTSECURITY_PROJECT_ID }}/files' \
+                  -H 'accept: application/json' \
+                  -H 'Authorization: api-key ${{ secrets.BRIGHT_TOKEN }}' \
+                  -H 'Content-Type: multipart/form-data' \
+                  -F "file=@${file}" \
+                  -s)
+                file_id=$(echo ${response} | jq -r '.file_id')
+                echo "Uploaded file id: ${file_id}"
+              fi
+            done
+          id: har-upload
 
-      - name: Scan Start
-        id: start
-        uses: NeuraLegion/run-scan@release
-        with:
-          api_token: ${{ secrets.BRIGHT_TOKEN }}
-          hostname: app.brightsec.com
-          name: Bright Scan - ${{ github.sha }}
-          discovery_types: |
-            [ "archive" ]
-          file_id: ${{ steps.har-upload.outputs.fileId }}
-          hosts_filter: brokencrystals.com
+        - name: Scan Start
+          id: start
+          uses: NeuraLegion/run-scan@release
+          with:
+            api_token: ${{ secrets.BRIGHT_TOKEN }}
+            hostname: app.brightsec.com
+            name: Bright Scan - ${{ github.sha }}
+            discovery_types: |
+              [ "archive" ]
+            file_id: ${{ steps.har-upload.outputs.fileId }}
+            hosts-filter: brokencrystals.com
 
-      - name: Wait for Breakpoint
-        id: wait
-        uses: NeuraLegion/wait-for@release
-        with:
-          api_token:  ${{ secrets.BRIGHT_TOKEN }}
-          hostname: app.brightsec.com
-          scan: ${{ steps.start.outputs.id }}
-          wait_for: high
-          code_scanning_alerts: true
-          github_token: ${{ secrets.KEY_GITHUB }}
-          timeout: 600
-          stop_scan: true
+        - name: Wait for Breakpoint
+          id: wait
+          uses: NeuraLegion/wait-for@release
+          with:
+            api_token:  ${{ secrets.BRIGHT_TOKEN }}
+            hostname: app.brightsec.com
+            scan: ${{ steps.start.outputs.id }}
+            wait_for: high
+            code_scanning_alerts: true
+            github_token: ${{ secrets.KEY_GITHUB }}
+            timeout: 600
+            stop_scan: true
