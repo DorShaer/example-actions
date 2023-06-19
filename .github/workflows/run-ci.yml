@@ -50,9 +50,9 @@
             discovery_types: |
               [ "archive" ]
             file_id: ${{ steps.har-upload.outputs.fileId }}
-            hosts-filter: brokencrystals.com
+            hosts_filter: brokencrystals.com
 
-        - name: Wait for Breakpoint
+        - name: Wait for Breakpoints
           id: wait
           uses: NeuraLegion/wait-for@release
           with:
