@@ -27,7 +27,7 @@
                   -H 'accept: application/json' \
                   -H 'Authorization: api-key ${{ secrets.BRIGHT_TOKEN }}' \
                   -H 'Content-Type: multipart/form-data' \
-                  -F "file=hars/@${file}" \
+                  -F "file=@hars/${file}" \
                   -s)
                 file_id=$(echo ${response} | jq -r '.file_id')
                 echo "Uploaded file id: ${file_id}"
