@@ -34,7 +34,7 @@ jobs:
               echo "Uploaded file id: ${file_id}"
             fi
           done
-          echo "file_id=$file_id" >> $GITHUB_ENV 
+          echo "::set-output name=file_id::$file_id"  
         id: upload-har
         
       - name: Scan Start
@@ -45,12 +45,13 @@ jobs:
           -H 'content-type: application/json' \
           --data-raw '{"name":"yellocard-automation-test","poolSize":10,"smart":true,"optimizedCrawler":true,"maxInteractionsChainLength":3,
           "skipStaticParams":true,"slowEpTimeout":null,"targetTimeout":null,"exclusions":{},
-          "projectId":"${{ secrets.BRIGHTSECURITY_PROJECT_ID }}","fileId":" ${{ env.file_id }}",
+          "projectId":"'"${{ secrets.BRIGHTSECURITY_PROJECT_ID }}"'","fileId":"'"${{ steps.upload-har.outputs.file_id }}"'",
           "hostsFilter":["brokencrystals.com"],"templateId":"t69wgyhwq1B66NkKbxoiqi","labels":[],
           "discoveryTypes":["archive"],"attackParamLocations":["path","query","fragment","body"],
-          "info":{"source":"ui","client":{"name":"bright-ui","version":"v4.76.2"}}}') 
+          "info":{"source":"ui","client":{"name":"bright-ui","version":"v4.76.2"}}}') \
           scan_id=$(echo ${scan_response} | grep -oP '(?<="id":")[^"]*')
-          echo "scan_id=$scan_id" >> $GITHUB_ENV
+          echo "Started scan: $(scan_id)"
+          echo "::set-output name=scan_id::$scan_id"
         id: start-scan
         
       - name: Wait for Breakpoint
@@ -59,7 +60,7 @@ jobs:
         with:
           api_token:  ${{ secrets.BRIGHT_TOKEN }}
           hostname: app.brightsec.com
-          scan: ${{ env.scan_id }}
+          scan: ${{ steps.start-scan.outputs.scan_id }}
           wait_for: high
           code_scanning_alerts: true
           github_token: ${{ secrets.KEY_GITHUB }}
