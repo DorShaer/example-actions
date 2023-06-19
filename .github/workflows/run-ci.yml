@@ -32,6 +32,7 @@
                   -H 'Content-Type: multipart/form-data' \
                   -F "file=@${file}" \
                   -s)  
+                echo $response  
                 file_id=$(echo ${response} | grep -E '"id":"(.*?)"'
                 echo $file_id
                 echo "Uploaded file id: ${file_id}"
