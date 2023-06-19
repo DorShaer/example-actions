@@ -48,8 +48,7 @@
             "projectId":"${{ secrets.BRIGHTSECURITY_PROJECT_ID }}","fileId":" ${{ steps.upload-har.outputs.file_id }}",
             "hostsFilter":["brokencrystals.com"],"templateId":"t69wgyhwq1B66NkKbxoiqi","labels":[],
             "discoveryTypes":["archive"],"attackParamLocations":["path","query","fragment","body"],
-            "info":{"source":"ui","client":{"name":"bright-ui","version":"v4.76.2"}}}') \
-            --compressed
+            "info":{"source":"ui","client":{"name":"bright-ui","version":"v4.76.2"}}}') --compressed \
             echo "::set-output name=scan_id::$scan_id"
           id: start-scan
           
