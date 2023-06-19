@@ -21,6 +21,7 @@ jobs:
           mkdir hars
           cd hars
           wget https://gist.githubusercontent.com/DorShaer/037475d0febe67396d374a56d053e13e/raw/227b68d164051c024713fa5af7fa7cec7808af7d/brokencrystals.har -q
+          cd ..
           for file in hars/*; do
             if [ -f "$file" ]; then
               curl -X 'POST' \
@@ -28,7 +29,7 @@ jobs:
                 -H 'accept: application/json' \
                 -H 'Authorization: api-key ${{ secrets.BRIGHT_TOKEN }}' \
                 -H 'Content-Type: multipart/form-data' \
-                -F 'file=@${file}'
+                -F "file=@${file}"
             fi
           done
         id: har-upload
