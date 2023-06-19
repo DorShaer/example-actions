@@ -9,8 +9,6 @@ on:
       - brokencrystals
   pull_request:
     branches: [main]
-  schedule:
-    - cron: "0 0 * * THU"
 
 jobs:
   upload_HAR:
