@@ -53,15 +53,3 @@ jobs:
           echo "Started scan: $scan_id"
           echo "::set-output name=scan_id::$scan_id"
         id: start-scan
-        
-      - name: Scan for issues and create alerts
-        id: scan
-        uses: NeuraLegion/wait-for@release
-        with:
-          api_token:  ${{ secrets.BRIGHT_TOKEN }}
-          hostname: app.brightsec.com
-          scan: ${{ steps.start-scan.outputs.scan_id }}
-          code_scanning_alerts: true
-          github_token: ${{ secrets.KEY_GITHUB }}
-          timeout: 600
-          stop_scan: false
