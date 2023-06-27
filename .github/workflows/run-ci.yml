@@ -54,7 +54,6 @@ jobs:
           echo "::set-output name=scan_id::$scan_id"
         id: start-scan
         
-        
       - name: Scan for issues and create alerts
         id: scan
         uses: NeuraLegion/wait-for@release
@@ -65,3 +64,4 @@ jobs:
           code_scanning_alerts: true
           github_token: ${{ secrets.KEY_GITHUB }}
           timeout: 600
+          stop_scan: false
