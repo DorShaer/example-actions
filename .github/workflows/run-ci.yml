@@ -25,7 +25,7 @@ jobs:
         with:
           api_token: ${{ secrets.BRIGHT_TOKEN}}
           hostname: app.brightsec.com
-          name: Bright Scan - ${{ github.sha }} - ${{ steps.branch-name.outputs.head_ref_branch }}
+          name: Bright Scan - ${{ github.sha }} - ${{ steps.branch-name.outputs.ref_branch }}
           discovery_types: |
             [ "crawler" ]
           crawler_urls: |
