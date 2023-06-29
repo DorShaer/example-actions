@@ -16,22 +16,20 @@ jobs:
     runs-on: ubuntu-latest
     container: node:16
     steps:
-      - name: Extract branch name
-        shell: bash
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_ENV
-
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v2
       - name: Scan Start
         id: start
         uses: NeuraLegion/run-scan@release
         with:
           api_token: ${{ secrets.BRIGHT_TOKEN}}
           hostname: app.brightsec.com
-          name: Bright Scan - ${{ github.sha }} - ${{ env.branch }}
+          name: Bright Scan - ${{ github.sha }} - ${{ steps.branch-name.outputs.head_ref_branch }}
           discovery_types: |
             [ "crawler" ]
           crawler_urls: |
             [ "https://brokencrystals.com" ]
-            
       - name: Wait for breakpoint
         id: wait
         uses: NeuraLegion/wait-for@release
