@@ -9,8 +9,6 @@ on:
       - brokencrystals
   pull_request:
     branches: [main]
-  schedule:
-    - cron: "0 0 * * THU"
 
 jobs:
   wait_for:
@@ -24,7 +22,7 @@ jobs:
         with:
           api_token: ${{ secrets.BRIGHT_TOKEN}}
           hostname: app.brightsec.com
-          name: Bright Scan - ${{ github.sha }}
+          name: Bright Scan - ${{ github.sha }} - ${{ github.ref_slug }}
           discovery_types: |
             [ "crawler" ]
           crawler_urls: |
@@ -32,7 +30,7 @@ jobs:
             
       - name: Extract branch name
         shell: bash
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        run: echo 
         id: extract_branch 
       - name: Wait for breakpoint
         id: wait
