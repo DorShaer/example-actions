@@ -1,44 +1,66 @@
-name: CI
+name: bright-api-incremental-scan
 
 on:
   push:
     branches:
-      - crawler
-      - har-file
-      - swagger
       - brokencrystals
   pull_request:
     branches: [main]
 
 jobs:
-  wait_for:
-    name: Wait for any issues, gh-int + code_scanning_alerts on
+  bright_api_scan:
     runs-on: ubuntu-latest
-    container: node:16
+    env:
+      BRIGHT_API_TOKEN: ${{ secrets.BRIGHT_API_TOKEN }}
+      BRIGHT_PROJECT_ID: ${{ secrets.BRIGHT_PROJECT_ID }}
+
     steps:
-      - name: Get branch name
-        id: branch-name
-        uses: tj-actions/branch-names@v2
-      - name: Scan Start
-        id: start
-        uses: NeuraLegion/run-scan@release
+      - name: Run_CLI_Discovery
+        id: discovery
+        run: |
+          echo "::info::starting a discovery"
+          dscan_id=$(docker run --rm brightsec/cli discovery:run --crawler "https://brokencrystals.com" --token "${BRIGHT_API_TOKEN}" --project "${BRIGHT_PROJECT_ID}" --name "brokencrystals api discovery")
+
+          if [ $? -ne 0 ]; then
+            echo "::error:: Discovery scan failed to start."
+            exit 1
+          fi
+          
+          echo "::info::Discovery scan started with ID: $dscan_id"
+          echo "discoveryScanID=$dscan_id" >> $GITHUB_OUTPUT
+
+      - name: Wait for Discovery to Complete
+        uses: NeuraLegion/wait-for-discovery@release
         with:
-          api_token: ${{ secrets.BRIGHT_TOKEN}}
-          hostname: app.brightsec.com
-          name: Bright Scan - ${{ github.sha }} - ${{ github.repository }}/${{ steps.branch-name.outputs.ref_branch }}
-          discovery_types: |
-            [ "crawler" ]
-          crawler_urls: |
-            [ "https://brokencrystals.com" ]
-      - name: Wait for breakpoint
-        id: wait
-        uses: NeuraLegion/wait-for@release
-        with:
-          api_token:  ${{ secrets.BRIGHT_TOKEN }}
-          hostname: app.brightsec.com
-          scan: ${{ steps.start.outputs.id }}
-          wait_for: high
-          code_scanning_alerts: true
-          github_token: ${{ secrets.KEY_GITHUB }}
+          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
+          discovery_id: ${{ steps.discovery.outputs.discoveryScanID }}
+          project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
           timeout: 600
-          stop_scan: true
+
+      - name: Get entrypoints
+        id: ids
+        run: |
+          (docker run --rm brightsec/cli entrypoints:list --token "${BRIGHT_API_TOKEN}" --project "${BRIGHT_PROJECT_ID}" --status 'new' --status 'changed' --status 'vulnerable' --limit 500) > entrypoints.json
+          if [ ! -f entrypoints.json ]; then
+            echo "::error::entrypoints.json not found"
+            exit 1
+          fi
+          ids=$(grep -o '"id": *"[^"]*"' entrypoints.json | sed 's/.*: *"//' | sed 's/"$//' | tr '\n' ' ')
+          entryPoints=""
+          for id in $ids; do entryPoints+="-e $id "; echo "$id"; done
+
+          if [ -z "$entryPoints" ]; then
+            echo "::notice::No new or changed entrypoints found, skipping Run Vulnerability Scan step"
+            echo "eps=false" >> $GITHUB_OUTPUT
+          else
+            echo "eps=$entryPoints" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Run Vulnerability Scan
+        id: scan
+        env:
+          ENTRY_POINTS: ${{ steps.ids.outputs.eps }}
+        run: |
+          timestamp=$(date +'%Y-%m-%d_%H-%M-%S')
+          scan_name="BrokenCrystals API scan $timestamp"
+          scan_id=$(docker run --rm brightsec/cli scan:run --token "${BRIGHT_API_TOKEN}" --project "${BRIGHT_PROJECT_ID}" --bucket "api" --name "$scan_name" --entrypoint ${ENTRY_POINTS})
