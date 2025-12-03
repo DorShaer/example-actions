@@ -11,7 +11,7 @@ jobs:
   bright_api_scan:
     runs-on: ubuntu-latest
     env:
-      BRIGHT_API_TOKEN: ${{ secrets.BRIGHT_API_TOKEN }}
+      BRIGHT_TOKEN: ${{ secrets.BRIGHT_TOKEN }}
       BRIGHT_PROJECT_ID: ${{ secrets.BRIGHT_PROJECT_ID }}
 
     steps:
@@ -19,7 +19,7 @@ jobs:
         id: discovery
         run: |
           echo "::info::starting a discovery"
-          dscan_id=$(docker run --rm brightsec/cli discovery:run --crawler "https://brokencrystals.com" --token "${BRIGHT_API_TOKEN}" --project "${BRIGHT_PROJECT_ID}" --name "brokencrystals api discovery")
+          dscan_id=$(docker run --rm brightsec/cli discovery:run --crawler "https://brokencrystals.com" --token "${BRIGHT_TOKEN}" --project "${BRIGHT_PROJECT_ID}" --name "brokencrystals api discovery")
 
           if [ $? -ne 0 ]; then
             echo "::error:: Discovery scan failed to start."
@@ -32,7 +32,7 @@ jobs:
       - name: Wait for Discovery to Complete
         uses: NeuraLegion/wait-for-discovery@release
         with:
-          api_token: ${{ secrets.BRIGHT_API_TOKEN }}
+          api_token: ${{ secrets.BRIGHT_TOKEN }}
           discovery_id: ${{ steps.discovery.outputs.discoveryScanID }}
           project_id: ${{ secrets.BRIGHT_PROJECT_ID }}
           timeout: 600
@@ -40,7 +40,7 @@ jobs:
       - name: Get entrypoints
         id: ids
         run: |
-          (docker run --rm brightsec/cli entrypoints:list --token "${BRIGHT_API_TOKEN}" --project "${BRIGHT_PROJECT_ID}" --status 'new' --status 'changed' --status 'vulnerable' --limit 500) > entrypoints.json
+          (docker run --rm brightsec/cli entrypoints:list --token "${BRIGHT_TOKEN}" --project "${BRIGHT_PROJECT_ID}" --status 'new' --status 'changed' --status 'vulnerable' --limit 500) > entrypoints.json
           if [ ! -f entrypoints.json ]; then
             echo "::error::entrypoints.json not found"
             exit 1
@@ -63,4 +63,4 @@ jobs:
         run: |
           timestamp=$(date +'%Y-%m-%d_%H-%M-%S')
           scan_name="BrokenCrystals API scan $timestamp"
-          scan_id=$(docker run --rm brightsec/cli scan:run --token "${BRIGHT_API_TOKEN}" --project "${BRIGHT_PROJECT_ID}" --bucket "api" --name "$scan_name" --entrypoint ${ENTRY_POINTS})
+          scan_id=$(docker run --rm brightsec/cli scan:run --token "${BRIGHT_TOKEN}" --project "${BRIGHT_PROJECT_ID}" --bucket "api" --name "$scan_name" --entrypoint ${ENTRY_POINTS})
